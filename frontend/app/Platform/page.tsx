@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -70,7 +70,7 @@ const programs = [
     name: "SWAYAM Courses",
     provider: "SWAYAM",
     description: "Build skills with courses from universities and industry.",
-    icon: "🎓",
+    icon: "≡ƒÄô",
     url: "https://swayam.gov.in/",
     keywords: ["python", "java", "data", "ai", "machine learning", "cloud"],
   },
@@ -78,7 +78,7 @@ const programs = [
     name: "MLH Fellowships",
     provider: "Major League Hacking",
     description: "Gain practical experience through collaborative projects.",
-    icon: "💻",
+    icon: "≡ƒÆ╗",
     url: "https://fellowship.mlh.io/",
     keywords: ["software", "developer", "engineering", "web", "github"],
   },
@@ -86,7 +86,7 @@ const programs = [
     name: "Kaggle",
     provider: "Kaggle",
     description: "Practice data science and machine learning with projects.",
-    icon: "📊",
+    icon: "≡ƒôè",
     url: "https://www.kaggle.com/",
     keywords: ["data", "python", "machine learning", "ai", "analytics"],
   },
@@ -281,7 +281,7 @@ export default function PlatformPage() {
           {/* Internship platforms */}
           <section>
             <div className="mb-3 border-t-4 border-[#A67B5B] pt-4">
-              <h2 className="text-lg font-bold">🌐 Internship Platforms</h2>
+              <h2 className="text-lg font-bold">≡ƒîÉ Internship Platforms</h2>
               <p className="text-xs text-[#8B7A6B]">
                 Search portals using your resume skills
               </p>
@@ -311,7 +311,7 @@ export default function PlatformPage() {
                     rel="noopener noreferrer"
                     className="mt-4 self-start rounded-xl bg-[#F0D6B5] px-4 py-2 text-xs font-bold text-[#754D32] hover:bg-[#E5C49D]"
                   >
-                    Search platform ↗
+                    Search platform Γåù
                   </a>
                 </article>
               ))}
@@ -322,13 +322,13 @@ export default function PlatformPage() {
           <section>
             <div className="mb-3 flex items-center justify-between border-t-4 border-[#A67B5B] pt-4">
               <div>
-                <h2 className="text-lg font-bold">💼 Internship Offers</h2>
+                <h2 className="text-lg font-bold">≡ƒÆ╝ Internship Offers</h2>
                 <p className="text-xs text-[#8B7A6B]">
                   Live listings matched to your resume
                 </p>
               </div>
               <span className="rounded-full bg-[#F0E0CD] px-3 py-1 text-xs font-semibold text-[#825A3B]">
-                {loading ? "Loading…" : `${filteredInternships.length} Offers`}
+                {loading ? "LoadingΓÇª" : `${filteredInternships.length} Offers`}
               </span>
             </div>
 
@@ -338,12 +338,12 @@ export default function PlatformPage() {
               disabled={loading || refreshing}
               className="mb-4 rounded-lg border border-[#D8C8B8] bg-white px-3 py-2 text-xs font-semibold text-[#754D32] hover:bg-[#F6EBDD] disabled:opacity-60"
             >
-              {refreshing ? "Refreshing…" : "Refresh offers"}
+              {refreshing ? "RefreshingΓÇª" : "Refresh offers"}
             </button>
 
             {loading ? (
               <div className="rounded-2xl border border-[#E5D8C9] bg-white p-8 text-center text-sm text-[#75675D]">
-                Finding internships that match your resume…
+                Finding internships that match your resumeΓÇª
               </div>
             ) : error ? (
               <div className="rounded-2xl border border-amber-200 bg-white p-6 text-sm text-amber-800">
@@ -389,7 +389,7 @@ export default function PlatformPage() {
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
                       {internship.location && (
                         <span className="rounded-full bg-[#F1E8DE] px-3 py-1">
-                          📍 {internship.location}
+                          ≡ƒôì {internship.location}
                         </span>
                       )}
                       {internship.work_type && (
@@ -400,7 +400,7 @@ export default function PlatformPage() {
                       <span className="rounded-full bg-[#F5DFC3] px-3 py-1 text-[#795333]">
                         {getPayStatus(internship)}
                         {(internship.stipend ?? internship.salary) != null &&
-                          ` · ${internship.stipend ?? internship.salary}`}
+                          ` ┬╖ ${internship.stipend ?? internship.salary}`}
                       </span>
                     </div>
 
@@ -432,7 +432,7 @@ export default function PlatformPage() {
                           rel="noopener noreferrer"
                           className="rounded-xl bg-[#A67B5B] px-4 py-2 text-xs font-bold text-white hover:bg-[#8E674A]"
                         >
-                          Apply now ↗
+                          Apply now Γåù
                         </a>
                       ) : (
                         <span className="text-xs text-[#9B8979]">
@@ -449,7 +449,7 @@ export default function PlatformPage() {
           {/* Growth suggestions */}
           <section>
             <div className="mb-3 border-t-4 border-[#A67B5B] pt-4">
-              <h2 className="text-lg font-bold">💡 Extra Suggestions</h2>
+              <h2 className="text-lg font-bold">≡ƒÆí Extra Suggestions</h2>
               <p className="text-xs text-[#8B7A6B]">
                 Programs related to your skills and focus areas
               </p>
@@ -497,7 +497,7 @@ export default function PlatformPage() {
                     rel="noopener noreferrer"
                     className="mt-4 self-start rounded-xl bg-[#A67B5B] px-4 py-2 text-xs font-bold text-white hover:bg-[#8E674A]"
                   >
-                    Explore ↗
+                    Explore Γåù
                   </a>
                 </article>
               ))}
@@ -505,6 +505,41 @@ export default function PlatformPage() {
           </section>
         </div>
       </div>
+      {/* =====================================================
+          FINAL FEEDBACK
+      ===================================================== */}
+
+      <section className="max-w-[1500px] mx-auto px-6 md:px-8 py-10">
+
+        <div className="bg-white rounded-[28px] border border-[#e7ddcf] shadow-sm p-8 md:p-10 text-center">
+
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-[#fff0c8] flex items-center justify-center text-2xl">
+            💬
+          </div>
+
+          <h2 className="text-2xl md:text-3xl font-extrabold mt-5">
+            Finished Exploring Career Opportunities?
+          </h2>
+
+          <p className="text-[#756b62] mt-3 max-w-2xl mx-auto leading-relaxed">
+            We would love to hear about your Career Compass experience.
+            Share your feedback and help us make the platform better.
+          </p>
+
+          <button
+            onClick={() => {
+              window.location.href = "/feedback";
+            }}
+            className="mt-6 bg-[#ae7859] hover:bg-[#966247] text-white px-7 py-3 rounded-xl text-sm font-extrabold shadow-sm transition"
+          >
+            Give Feedback →
+          </button>
+
+        </div>
+
+      </section>
+
     </main>
+    
   );
 }

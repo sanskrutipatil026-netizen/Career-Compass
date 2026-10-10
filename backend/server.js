@@ -6,43 +6,19 @@ const dns = require("dns");
 
 dotenv.config();
 
-// ==========================================================
-// USE GOOGLE DNS FOR MONGODB ATLAS CONNECTION
-// ==========================================================
-
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
-// ==========================================================
-// CREATE EXPRESS APP
-// ==========================================================
 
 const app = express();
 
-// ==========================================================
-// MIDDLEWARE
-// ==========================================================
-
+// Middleware
 app.use(cors());
+app.use(express.json());
 
-app.use(
-  express.json({
-    limit: "10mb",
-  })
-);
+// Authentication routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/feedback", require("./routes/feedback"));
 
-// ==========================================================
-// AUTHENTICATION ROUTES
-// ==========================================================
-
-app.use(
-  "/api/auth",
-  require("./routes/auth")
-);
-
-// ==========================================================
-// SKILL ASSESSMENT ROUTES
-// ==========================================================
-
+// Skill assessment routes
 const skillAssessmentRoutes =
   require("./routes/skillAssessment");
 
@@ -51,10 +27,7 @@ app.use(
   skillAssessmentRoutes
 );
 
-// ==========================================================
-// INTERVIEW ROUTES
-// ==========================================================
-
+// Interview routes
 const interviewRoutes =
   require("./routes/interview");
 
@@ -63,10 +36,7 @@ app.use(
   interviewRoutes
 );
 
-// ==========================================================
-// RESUME ANALYSIS ROUTES
-// ==========================================================
-
+// Resume analysis routes
 const resumeAnalysisRoutes =
   require("./routes/resumeAnalysis");
 
@@ -75,44 +45,26 @@ app.use(
   resumeAnalysisRoutes
 );
 
-// ==========================================================
-// MONGODB CONNECTION
-// ==========================================================
 
+// MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log(
-      "✅ MongoDB Connected Successfully"
-    );
+    console.log("✅ MongoDB Connected Successfully");
   })
   .catch((err) => {
-    console.log(
-      "❌ MongoDB Connection Error"
-    );
-
+    console.log("❌ MongoDB Connection Error");
     console.log(err);
   });
 
-// ==========================================================
-// TEST ROUTE
-// ==========================================================
-
+// Test route
 app.get("/", (req, res) => {
-  res.send(
-    "Backend server is running"
-  );
+  res.send("Backend server is running");
 });
 
-// ==========================================================
-// SERVER
-// ==========================================================
-
-const PORT =
-  process.env.PORT || 5000;
+// Server
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
+  console.log(`🚀 Server running on port ${PORT}`);
 });
