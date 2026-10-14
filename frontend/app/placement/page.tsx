@@ -217,7 +217,7 @@ export default function PlacementPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-end mb-6">
   <button
-    onClick={() => router.push("/Platform")}
+    onClick={() => router.push("/platforms")}
     className="bg-[#A67B5B] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90"
   >
     Platform
