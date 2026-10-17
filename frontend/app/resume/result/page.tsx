@@ -633,62 +633,56 @@ export default function ResumeResultPage() {
 
   return (
     <div className="min-h-screen bg-amber-100 text-[#49382a]">
-      {/* NAVBAR */}
-
       <nav className="sticky top-0 z-50 flex flex-col justify-between gap-3 bg-[#A67B5B] px-4 py-3 shadow-md sm:px-6 lg:flex-row lg:items-center lg:px-8">
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="flex items-center gap-3 text-left"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-lg font-extrabold text-[#A67B5B] shadow-sm">
+        {/* LOGO AND BRAND */}
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 font-bold text-[#A67B5B]">
             AI
           </div>
 
           <div>
-            <h1 className="text-lg font-extrabold tracking-wide text-amber-100">
+            <h1 className="text-lg font-bold text-amber-100">
               Career Compass
             </h1>
 
-            <p className="text-[10px] font-semibold tracking-[0.2em] text-[#F5EBDD]">
-              AI POWERED CAREER GUIDANCE
+            <p className="text-xs text-gray-200">
+              AI POWERED
             </p>
           </div>
-        </button>
+        </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        {/* NAVIGATION LINKS */}
+        <div className="flex flex-wrap items-center justify-center gap-4 font-medium sm:gap-8">
           <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
             onClick={() => router.push("/dashboard")}
-            className="rounded-xl bg-amber-100/15 px-3 py-2 text-amber-100 transition hover:bg-amber-100/25"
           >
             ⚡ Dashboard
           </button>
 
           <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
             onClick={() => router.push("/interview")}
-            className="rounded-xl px-3 py-2 text-[#FFF8ED] transition hover:bg-amber-100/15"
           >
             🎯 Practice
           </button>
 
           <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
             onClick={() => router.push("/history")}
-            className="rounded-xl px-3 py-2 text-[#FFF8ED] transition hover:bg-amber-100/15"
           >
             📊 My Sessions
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-sm font-extrabold text-[#A67B5B]">
-            U
-          </div>
+        {/* USER PROFILE AND LOGOUT */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4">
+          
 
-          <button
-            onClick={() => router.push("/")}
-            className="rounded-full border border-amber-100/40 bg-amber-100 px-4 py-2 text-sm font-bold text-[#604C38] shadow-sm transition hover:bg-[#F1E4D1]"
-          >
-            Logout ↗
-          </button>
+          
         </div>
       </nav>
 
@@ -1578,17 +1572,17 @@ export default function ResumeResultPage() {
               </button>
 
               <button
-                onClick={() => router.push("/placement")}
-                className="rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/20"
-              >
-                ◈ Placement Readiness
-              </button>
-
-              <button
                 onClick={() => router.push("/skills")}
                 className="rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/20"
               >
-                ✧ Skills Assessment
+                 ◇ Skills Assesment
+              </button>
+
+              <button
+                onClick={() => router.push("/placement")}
+                className="rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+              >
+                 ◈ Placement Readiness
               </button>
             </div>
           </div>

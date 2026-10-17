@@ -75,7 +75,7 @@ export default function ResultPage() {
 
           <div>
             <h1 className="font-bold text-amber-100 text-lg">
-              MockInterview
+            Career Compass
             </h1>
 
             <p className="text-xs text-gray-500">
@@ -84,9 +84,9 @@ export default function ResultPage() {
           </div>
         </div>
         <div className="flex gap-8 font-md justify-center">
-  <button className="text-gray-200 hover:text-blue-500" onClick={()=> router.push("/dashboard")}>ΓÜíDashboard</button>
-  <button onClick={() => router.push("/interview")} className="text-gray-200 hover:text-blue-500">≡ƒÄ»Practice</button>
-  <button onClick={() => router.push("/history")} className="text-gray-200 hover:text-blue-500">≡ƒôèMy Sessions</button>
+  <button className="text-gray-200 hover:text-blue-500" onClick={()=> router.push("/dashboard")}>⚡Dashboard</button>
+  <button onClick={() => router.push("/interview")} className="text-gray-200 hover:text-blue-500">🎯Practice</button>
+  <button onClick={() => router.push("/history")} className="text-gray-200 hover:text-blue-500">📊My Sessions</button>
 
 </div>
         
@@ -94,14 +94,10 @@ export default function ResultPage() {
 
         
         <div className="flex items-center justify-center gap-4 ">
-          <div className="flex justify-center gap-2 bg-gray-100 rounded-full px-3 py-2">
-       <div className="w-8 h-8 rounded-full bg-[#A67B5B] text-white flex items-center justify-center font-bold">S</div>
-      <span className="font-md text-black">Hi,</span>
-      <span className="font-bold text-black">User</span>
-      </div>
-        <button className="bg-gray-100 text-black px-5 py-2 rounded-full">
-          Logout
-        </button>
+          
+       
+      
+        
         </div>
         
 </nav>

@@ -107,31 +107,57 @@ const data = await response.json();
   return (
     <div className="min-h-screen bg-amber-100">
 
-      {/* Header */}
-      <nav className="bg-[#A67B5B] shadow-sm px-8 py-4 flex justify-between items-center">
-
-        <div className="flex items-center gap-3">
-
-          <div className="w-10 h-10 rounded-xl bg-amber-100 text-[#A67B5B] flex items-center justify-center font-bold">
+      <nav className="sticky top-0 z-50 flex flex-col justify-between gap-3 bg-[#A67B5B] px-4 py-3 shadow-md sm:px-6 lg:flex-row lg:items-center lg:px-8">
+        {/* LOGO AND BRAND */}
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 font-bold text-[#A67B5B]">
             AI
           </div>
 
           <div>
-            <h1 className="font-bold text-amber-100 text-lg">
+            <h1 className="text-lg font-bold text-amber-100">
               Career Compass
             </h1>
 
-            <p className="text-xs text-white">
+            <p className="text-xs text-gray-200">
               AI POWERED
             </p>
           </div>
-
         </div>
 
-        <div className="text-amber-100 font-medium">
-          Your Feedback Matters
+        {/* NAVIGATION LINKS */}
+        <div className="flex flex-wrap items-center justify-center gap-4 font-medium sm:gap-8">
+          <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
+            onClick={() => router.push("/dashboard")}
+          >
+            ⚡ Dashboard
+          </button>
+
+          <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
+            onClick={() => router.push("/interview")}
+          >
+            🎯 Practice
+          </button>
+
+          <button
+            type="button"
+            className="text-gray-200 transition-colors hover:text-white"
+            onClick={() => router.push("/history")}
+          >
+            📊 My Sessions
+          </button>
         </div>
 
+        {/* USER PROFILE AND LOGOUT */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4">
+          
+
+          
+        </div>
       </nav>
 
       {/* Main Content */}

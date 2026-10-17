@@ -50,7 +50,7 @@ export default function HistoryPage() {
 
           <div>
             <h1 className="font-bold text-amber-100 text-lg">
-              MockInterview
+              Career Compass
             </h1>
 
             <p className="text-xs text-amber-100">
@@ -60,9 +60,9 @@ export default function HistoryPage() {
         </div>
         
         <div className="flex gap-8 font-md justify-center">
-  <button className="text-gray-200 hover:text-blue-500" onClick={()=> router.push("/dashboard")}>ΓÜíDashboard</button>
-  <button onClick={() => router.push("/interview")} className="text-gray-200 hover:text-blue-500">≡ƒÄ»Practice</button>
-  <button onClick={() => router.push("/history")} className="text-gray-200 hover:text-blue-500">≡ƒôèMy Sessions</button>
+  <button className="text-gray-200 hover:text-blue-500" onClick={()=> router.push("/dashboard")}>⚡Dashboard</button>
+  <button onClick={() => router.push("/interview")} className="text-gray-200 hover:text-blue-500">🎯Practice</button>
+  <button onClick={() => router.push("/history")} className="text-gray-200 hover:text-blue-500"> 📊My Sessions</button>
 
 </div>
         
@@ -70,14 +70,7 @@ export default function HistoryPage() {
 
         
         <div className="flex items-center justify-center gap-4 ">
-          <div className="flex justify-center gap-2 bg-gray-100 rounded-full px-3 py-2">
-       <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">S</div>
-      <span className="font-md text-black">Hi,</span>
-      <span className="font-bold text-black">User</span>
-      </div>
-        <button className="bg-gray-100 text-black px-5 py-2 rounded-full">
-          Logout
-        </button>
+          
       </div>
       
         
@@ -89,7 +82,7 @@ export default function HistoryPage() {
   <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
 
     <h2 className="text-2xl font-bold text-gray-800 mb-5">
-      ≡ƒôê Progress Overview
+      Progress Overview
     </h2>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -150,15 +143,15 @@ export default function HistoryPage() {
       Interview #{index + 1}
     </h2>
 
-    <p className="text-black">≡ƒùô Interview Date: {item.date}</p>
-    <p className="text-black">Γ¡É Score: {item.score}/50</p>
-    <p className="text-black">Γ£à Answered: {item.answered}</p>
-    <p className="text-black">ΓÅ⌐ Skipped: {item.skipped}</p>
-    <p className="text-black">≡ƒÄ» Difficulty: {item.difficulty}</p>
-    <p className="text-black">≡ƒò¢ Time: {item.time}</p>
+    <p className="text-black"> Interview Date: {item.date}</p>
+    <p className="text-black"> Score: {item.score}/50</p>
+    <p className="text-black">Answered: {item.answered}</p>
+    <p className="text-black"> Skipped: {item.skipped}</p>
+    <p className="text-black">Difficulty: {item.difficulty}</p>
+    <p className="text-black">Time: {item.time}</p>
 
     <p className="text-black font-semibold">
-      ≡ƒÅå Final Verdict:
+      Final Verdict:
       {item.score >= 40
         ? " Excellent"
         : item.score >= 30
@@ -197,14 +190,14 @@ export default function HistoryPage() {
         }
         className="bg-[#A67B5B] text-white px-4 py-2 rounded-lg"
       >
-        ≡ƒôä View Details
+      View Details
       </button>
 
       <button
         onClick={() => deleteInterview(index)}
         className="bg-red-500 text-white px-4 py-2 rounded-lg"
       >
-        ≡ƒùæ Delete
+       Delete
       </button>
     </div>
 
@@ -253,7 +246,7 @@ export default function HistoryPage() {
   <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
 
     <h2 className="text-2xl font-bold text-gray-800 mb-5">
-      ≡ƒôê Interview Progress
+       Interview Progress
     </h2>
 
     <div className="flex items-end gap-4 h-64 border-b border-l border-gray-300 px-4">
@@ -302,7 +295,7 @@ export default function HistoryPage() {
   <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
 
     <h2 className="text-2xl font-bold text-gray-800 mb-4">
-      Γ¡É Candidate Potential
+     Candidate Potential
     </h2>
 
     {(() => {
@@ -316,7 +309,7 @@ export default function HistoryPage() {
         return (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
             <h3 className="text-xl font-bold text-blue-700">
-              Γ¡É High Potential Candidate
+             High Potential Candidate
             </h3>
 
             <p className="text-gray-600 mt-2">
@@ -331,7 +324,7 @@ export default function HistoryPage() {
       return (
         <div className="bg-gray-50 border rounded-xl p-5">
           <h3 className="text-xl font-bold text-gray-700">
-            ≡ƒôÜ Keep Improving
+            Keep Improving
           </h3>
 
           <p className="text-gray-600 mt-2">
@@ -349,7 +342,7 @@ export default function HistoryPage() {
   <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
 
     <h2 className="text-2xl font-bold text-gray-800 mb-4">
-      ≡ƒñû Personalized Recommendations
+      Personalized Recommendations
     </h2>
 
     {history.length === 1 ? (
@@ -365,7 +358,7 @@ export default function HistoryPage() {
         {history[history.length - 1].score <
         history[0].score && (
           <div className="border rounded-lg p-3 text-gray-700">
-            ΓÜá∩╕Å Your interview score has decreased. Focus on
+          Your interview score has decreased. Focus on
             practicing technical interview questions.
           </div>
         )}
@@ -373,21 +366,21 @@ export default function HistoryPage() {
         {history[history.length - 1].score >=
         history[0].score && (
           <div className="border rounded-lg p-3 text-gray-700">
-            Γ£à Your interview performance is improving. Continue
+            Your interview performance is improving. Continue
             practicing consistently.
           </div>
         )}
 
         {history[history.length - 1].score < 30 && (
           <div className="border rounded-lg p-3 text-gray-700">
-            ≡ƒôÜ Focus on fundamental technical concepts and
+             Focus on fundamental technical concepts and
             problem-solving questions.
           </div>
         )}
 
         {history[history.length - 1].score >= 40 && (
           <div className="border rounded-lg p-3 text-gray-700">
-            ≡ƒÜÇ Your technical performance is strong. Start
+             Your technical performance is strong. Start
             practicing advanced interview questions and real-world
             problems.
           </div>

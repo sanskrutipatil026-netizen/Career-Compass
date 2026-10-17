@@ -149,30 +149,9 @@ export default function ResumePage() {
 
         <div className="flex items-center gap-4">
 
-          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-2">
+          
 
-            <div className="w-8 h-8 rounded-full bg-[#A67B5B] text-white flex items-center justify-center font-bold">
-              U
-            </div>
-
-            <span className="font-medium text-black">
-              Hi,
-            </span>
-
-            <span className="font-bold text-black">
-              User
-            </span>
-
-          </div>
-
-          <button
-            className="bg-gray-100 text-black px-5 py-2 rounded-full"
-            onClick={() =>
-              router.push("/login")
-            }
-          >
-            Logout
-          </button>
+          
 
         </div>
 
