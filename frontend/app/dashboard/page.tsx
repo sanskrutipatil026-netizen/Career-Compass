@@ -36,7 +36,7 @@ export default function Dashboard() {
         console.log("FETCHING INTERVIEW HISTORY FROM MONGODB...");
 
         const response = await fetch(
-          "http://127.0.0.1:5000/api/interview/history",
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com"}/api/interview/history`,
           {
             method: "GET",
             cache: "no-store",

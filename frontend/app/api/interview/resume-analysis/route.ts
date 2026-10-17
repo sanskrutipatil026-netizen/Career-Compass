@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BACKEND_URL = (
-  process.env.BACKEND_URL || "http://127.0.0.1:5000"
+  process.env.BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com"
 ).replace(/\/+$/, "");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
