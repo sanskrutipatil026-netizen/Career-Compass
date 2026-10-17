@@ -362,7 +362,8 @@ export default function ResumeResultPage() {
         setError("");
 
         const response = await fetch(
-          "http://localhost:5000/api/resume-analysis/latest",
+          "https://career-compass-backend-v8sv.onrender.com/api/resume-analysis/latest"
+,
           {
             method: "GET",
             cache: "no-store",

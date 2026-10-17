@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/reset-password",
+        "https://career-compass-backend-v8sv.onrender.com/api/auth/reset-password",
         {
           method: "POST",
           headers: {

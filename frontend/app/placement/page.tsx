@@ -37,15 +37,15 @@ export default function PlacementPage() {
           interviewResponse,
         ] = await Promise.all([
           fetch(
-            "http://localhost:5000/api/resume-analysis/latest",
+            "https://career-compass-backend-v8sv.onrender.com/api/resume-analysis/latest",
             { cache: "no-store" }
           ),
           fetch(
-            "http://localhost:5000/api/skill-assessment/latest",
+            "https://career-compass-backend-v8sv.onrender.com/api/skill-assessment/latest",
             { cache: "no-store" }
           ),
           fetch(
-            "http://localhost:5000/api/interview/latest",
+            "https://career-compass-backend-v8sv.onrender.com/api/interview/latest",
             { cache: "no-store" }
           ),
         ]);

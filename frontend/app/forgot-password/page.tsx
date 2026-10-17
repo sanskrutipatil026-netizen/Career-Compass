@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/forgot-password",
+       "https://career-compass-backend-v8sv.onrender.com/api/auth/forgot-password",
         {
           method: "POST",
           headers: {

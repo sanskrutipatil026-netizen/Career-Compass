@@ -7,7 +7,7 @@ const groq = new Groq({
 });
 
 const BACKEND_URL =
-  process.env.BACKEND_URL || "http://localhost:5000";
+  process.env.BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com";
 
 export async function POST(req: Request) {
   try {

@@ -103,7 +103,7 @@ export default function SkillsPage() {
       setQuestions([]);
 
       const resumeResponse = await fetch(
-        "http://localhost:5000/api/resume-analysis/latest",
+        "https://career-compass-backend-v8sv.onrender.com/api/resume-analysis/latest",
         {
           method: "GET",
           cache: "no-store",
@@ -196,7 +196,7 @@ export default function SkillsPage() {
       setError("");
 
       const resumeResponse = await fetch(
-        "http://localhost:5000/api/resume-analysis/latest",
+        "https://career-compass-backend-v8sv.onrender.com/api/resume-analysis/latest",
         {
           method: "GET",
           cache: "no-store",
@@ -253,7 +253,7 @@ export default function SkillsPage() {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/skill-assessment/save",
+        "https://career-compass-backend-v8sv.onrender.com/api/skill-assessment/save",
         {
           method: "POST",
           headers: {

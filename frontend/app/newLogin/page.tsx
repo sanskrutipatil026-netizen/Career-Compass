@@ -61,7 +61,7 @@ const router=useRouter();
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/signup",
+        "https://career-compass-backend-v8sv.onrender.com/api/auth/signup",
         {
           method: "POST",
           headers: {

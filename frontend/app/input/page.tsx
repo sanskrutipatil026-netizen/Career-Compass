@@ -307,7 +307,7 @@ export default function Page() {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/extract-resume",
+          "https://career-compass-backend-v8sv.onrender.com/api/extract-resume",
           {
             method: "POST",
             body: formData,

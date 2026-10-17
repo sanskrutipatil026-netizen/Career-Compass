@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BACKEND_URL = (
-  process.env.BACKEND_URL || "http://localhost:5000"
+  process.env.BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com"
 ).replace(/\/+$/, "");
 
 type JsonObject = Record<string, unknown>;
