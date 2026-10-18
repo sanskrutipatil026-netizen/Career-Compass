@@ -343,13 +343,16 @@ const router=useRouter();
 
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => signIn("google", { callbackUrl: "/personalD" })}
-              className="rounded-xl border border-[#a67b5b]/25 bg-[#fffdf8] py-3 text-sm font-medium text-[#6b5344] transition hover:bg-[#fef3c7]"
-            >
-              Google
-            </button>
+            <div className="flex justify-center">
+  <button
+    type="button"
+    onClick={() => signIn("google", { callbackUrl: "/personalD" })}
+    className="w-1/2 translate-x-26 rounded-xl border border-[#a67b5b]/25 bg-[#fffdf8] py-3 text-sm font-medium text-[#6b5344] transition hover:bg-[#fef3c7]"
+  >
+    Google
+  </button>
+</div>
+
 
             
           </div>
