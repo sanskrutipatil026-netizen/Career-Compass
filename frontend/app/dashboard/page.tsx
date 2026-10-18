@@ -35,13 +35,11 @@ export default function Dashboard() {
 
         console.log("FETCHING INTERVIEW HISTORY FROM MONGODB...");
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com"}/api/interview/history`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
+       const response = await fetch("/api/interview/history", {
+method: "GET",
+cache: "no-store",
+});
+
 
         const responseText = await response.text();
 
@@ -190,20 +188,29 @@ export default function Dashboard() {
         </div>
 
         <div className="flex gap-8 font-medium">
-          <button className="text-gray-200 hover:text-white">
+          <button
+            className="text-gray-200 hover:text-blue-500"
+            onClick={() =>
+              router.push("/dashboard")
+            }
+          >
             ⚡Dashboard
           </button>
 
           <button
-            onClick={() => router.push("/interview")}
-            className="text-gray-200 hover:text-white"
+            onClick={() =>
+              router.push("/interview")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
             🎯Practice
           </button>
 
           <button
-            onClick={() => router.push("/history")}
-            className="text-gray-200 hover:text-white"
+            onClick={() =>
+              router.push("/history")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
             📊My Sessions
           </button>

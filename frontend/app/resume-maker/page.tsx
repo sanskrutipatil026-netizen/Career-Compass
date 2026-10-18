@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -147,6 +146,7 @@ export default function ResumeMakerPage() {
 
   const [data, setData] = useState<ResumeData>(initialData);
   const [improving, setImproving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [message, setMessage] = useState("");
 
   function update(field: keyof ResumeData, value: string) {
@@ -201,7 +201,7 @@ export default function ResumeMakerPage() {
     }
   }
 
-  function downloadPDF() {
+  function generateResumePDF() {
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -248,51 +248,6 @@ export default function ResumeMakerPage() {
       sidebarY = 18;
     }
 
-    function addMainText(
-      text: string,
-      size = 9,
-      bold = false
-    ) {
-      pdf.setFont("helvetica", bold ? "bold" : "normal");
-      pdf.setFontSize(size);
-      pdf.setTextColor(...dark);
-
-      const lines = pdf.splitTextToSize(text, mainWidth);
-      const lineHeight = size * 0.48;
-      const height = lines.length * lineHeight + 2;
-
-      if (mainY + height > bottom) {
-        nextPage();
-      }
-
-      pdf.text(lines, mainX, mainY);
-      mainY += height;
-    }
-
-    function addSidebarText(
-      text: string,
-      size = 8,
-      bold = false
-    ) {
-      pdf.setFont("helvetica", bold ? "bold" : "normal");
-      pdf.setFontSize(size);
-      pdf.setTextColor(...dark);
-
-      const lines = pdf.splitTextToSize(
-        text,
-        sidebarWidth - 7
-      );
-
-      const height = lines.length * size * 0.48 + 2;
-
-      if (sidebarY + height > bottom) {
-        nextPage();
-      }
-
-      pdf.text(lines, sidebarX + 3, sidebarY);
-      sidebarY += height;
-    }
-
     function addMainSection(title: string, content: string) {
       if (!content.trim()) return;
 
@@ -310,12 +265,7 @@ export default function ResumeMakerPage() {
       mainY += 2;
 
       pdf.setDrawColor(...brown);
-      pdf.line(
-        mainX,
-        mainY,
-        mainX + mainWidth,
-        mainY
-      );
+      pdf.line(mainX, mainY, mainX + mainWidth, mainY);
 
       mainY += 5;
 
@@ -332,8 +282,7 @@ export default function ResumeMakerPage() {
           mainWidth - 3
         );
 
-        const lineHeight = 4.5;
-        const height = wrapped.length * lineHeight + 2;
+        const height = wrapped.length * 4.5 + 2;
 
         if (mainY + height > bottom) {
           nextPage();
@@ -353,10 +302,7 @@ export default function ResumeMakerPage() {
       }
     }
 
-    function addSidebarSection(
-      title: string,
-      content: string
-    ) {
+    function addSidebarSection(title: string, content: string) {
       if (!content.trim()) return;
 
       sidebarY += 4;
@@ -369,7 +315,6 @@ export default function ResumeMakerPage() {
       sidebarY += 2;
 
       pdf.setDrawColor(210, 188, 165);
-
       pdf.line(
         sidebarX + 3,
         sidebarY,
@@ -441,13 +386,7 @@ export default function ResumeMakerPage() {
 
     pdf.setDrawColor(...brown);
     pdf.setLineWidth(0.8);
-
-    pdf.line(
-      mainX,
-      mainY,
-      mainX + mainWidth,
-      mainY
-    );
+    pdf.line(mainX, mainY, mainX + mainWidth, mainY);
 
     mainY += 6;
 
@@ -479,35 +418,13 @@ export default function ResumeMakerPage() {
         .join("\n")
     );
 
-    addSidebarSection(
-      "Technical Skills",
-      data.skills
-    );
+    addSidebarSection("Technical Skills", data.skills);
+    addSidebarSection("Certifications", data.certifications);
 
-    addSidebarSection(
-      "Certifications",
-      data.certifications
-    );
-
-    addMainSection(
-      "Profile",
-      data.summary
-    );
-
-    addMainSection(
-      "Projects",
-      data.projects
-    );
-
-    addMainSection(
-      "Experience & Internships",
-      data.experience
-    );
-
-    addMainSection(
-      "Achievements",
-      data.achievements
-    );
+    addMainSection("Profile", data.summary);
+    addMainSection("Projects", data.projects);
+    addMainSection("Experience & Internships", data.experience);
+    addMainSection("Achievements", data.achievements);
 
     const pages = pdf.getNumberOfPages();
 
@@ -528,18 +445,178 @@ export default function ResumeMakerPage() {
       );
     }
 
-    const filename = (
-      data.name || "Resume"
-    ).replace(/[^a-z0-9_-]/gi, "_");
+    const filename = (data.name || "Resume").replace(
+      /[^a-z0-9_-]/gi,
+      "_"
+    );
 
-    pdf.save(`${filename}_Resume.pdf`);
+    return {
+      pdf,
+      filename: `${filename}_Resume.pdf`,
+    };
+  }
+
+  function downloadPDF() {
+    const generated = generateResumePDF();
+    generated.pdf.save(generated.filename);
+  }
+
+  async function analyzeResume() {
+    if (!data.name.trim()) {
+      setMessage(
+        "Please enter your full name before analyzing your resume."
+      );
+      return;
+    }
+
+    if (
+      !data.email.trim() &&
+      !data.phone.trim() &&
+      !data.skills.trim() &&
+      !data.projects.trim() &&
+      !data.summary.trim()
+    ) {
+      setMessage(
+        "Please enter your resume details before analyzing."
+      );
+      return;
+    }
+
+    setAnalyzing(true);
+    setMessage("");
+
+    try {
+      // Generate the PDF directly without downloading it.
+      const generated = generateResumePDF();
+      const pdfBlob = generated.pdf.output("blob");
+
+      const resumeFile = new File(
+        [pdfBlob],
+        generated.filename,
+        { type: "application/pdf" }
+      );
+
+      // Request AI resume analysis.
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+
+      const analysisResponse = await fetch(
+        "/api/interview/resume-analysis",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const analysisResult = await analysisResponse.json();
+
+      if (!analysisResponse.ok) {
+        throw new Error(
+          analysisResult.error ||
+            "Resume analysis failed. Please try again."
+        );
+      }
+
+      const analysis =
+        analysisResult.analysis || analysisResult;
+
+      if (
+        !analysis ||
+        typeof analysis !== "object" ||
+        Array.isArray(analysis)
+      ) {
+        throw new Error(
+          "The AI analysis response has an unexpected format."
+        );
+      }
+
+      // Prepare resume details for the MongoDB save route.
+      const resumePayload = {
+        fileName: generated.filename,
+        fileType: "application/pdf",
+        fileSize: pdfBlob.size,
+        extractedText: [
+          data.name,
+          data.email,
+          data.phone,
+          data.location,
+          data.linkedin,
+          data.github,
+          data.degree,
+          data.branch,
+          data.college,
+          data.cgpa,
+          data.graduationYear,
+          data.summary,
+          data.skills,
+          data.projects,
+          data.experience,
+          data.certifications,
+          data.achievements,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        analysis,
+      };
+
+      // Save the analysis to MongoDB through the Express backend.
+      const backendUrl = (
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.BACKEND_URL ||
+        "http://localhost:5000"
+      ).replace(/\/+$/, "");
+
+      const saveResponse = await fetch(
+        `${backendUrl}/api/resume-analysis/save`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(resumePayload),
+        }
+      );
+
+      const saveResult = await saveResponse.json();
+
+      if (!saveResponse.ok || !saveResult.success) {
+        throw new Error(
+          saveResult.error ||
+            "AI analysis completed, but saving to MongoDB failed."
+        );
+      }
+
+      // Keep a browser copy for the result page.
+      localStorage.setItem(
+        "resumeAnalysis",
+        JSON.stringify(analysis)
+      );
+
+      localStorage.setItem(
+        "resumeAnalysisRecord",
+        JSON.stringify(saveResult.resumeAnalysis)
+      );
+
+      setMessage(
+        "Resume analyzed and saved successfully. Opening your results..."
+      );
+
+      router.push("/resume/result");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to analyze or save your resume. Please try again."
+      );
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   return (
     <main className="min-h-screen bg-amber-100 text-[#49382a]">
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 flex flex-col justify-between gap-3 bg-[#A67B5B] px-4 py-3 shadow-md sm:px-6 lg:flex-row lg:items-center lg:px-8">
-        {/* Logo and Brand */}
         <div className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 font-bold text-[#A67B5B]">
             AI
@@ -556,39 +633,36 @@ export default function ResumeMakerPage() {
           </div>
         </div>
 
-        {/* Navigation Links */}
         <div className="flex flex-wrap items-center justify-center gap-4 font-medium sm:gap-8">
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/dashboard")}
+            className="text-gray-200 hover:text-blue-500"
+            onClick={() =>
+              router.push("/dashboard")
+            }
           >
-            ⚡ Dashboard
+            ⚡Dashboard
           </button>
 
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/interview")}
+            onClick={() =>
+              router.push("/interview")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
-            🎯 Practice
+            🎯Practice
           </button>
 
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/history")}
+            onClick={() =>
+              router.push("/history")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
-            📊 My Sessions
+            📊My Sessions
           </button>
         </div>
 
-        {/* User Profile and Logout */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4">
-          
-
-          
-        </div>
+        <div className="flex items-center justify-center gap-3 sm:gap-4" />
       </nav>
 
       {/* PAGE CONTENT */}
@@ -737,22 +811,13 @@ export default function ResumeMakerPage() {
               <button
                 type="button"
                 onClick={improveSummary}
-                disabled={improving}
+                disabled={improving || analyzing}
                 className="rounded-xl border border-[#d6c1ad] bg-[#f5ede5] px-4 py-3 text-sm font-bold text-[#795638] transition hover:bg-[#ead8c6] disabled:opacity-60"
               >
                 {improving
                   ? "Improving with AI..."
                   : "Improve Summary with Groq AI"}
               </button>
-
-              {message && (
-                <p
-                  role="status"
-                  className="rounded-lg bg-amber-50 p-3 text-sm text-[#795638]"
-                >
-                  {message}
-                </p>
-              )}
 
               <Field
                 label="Technical Skills"
@@ -803,19 +868,44 @@ export default function ResumeMakerPage() {
             </div>
           </div>
 
-          {/* DOWNLOAD PDF */}
-          <button
-            type="button"
-            onClick={downloadPDF}
-            className="mt-7 w-full rounded-xl bg-[#A67B5B] px-5 py-4 font-bold text-white shadow-md transition hover:bg-[#8e6548] focus:outline-none focus:ring-2 focus:ring-[#A67B5B] focus:ring-offset-2"
-          >
-            Download Professional Resume PDF
-          </button>
+          {/* RESUME ACTIONS */}
+          <div className="mt-7 space-y-3">
+            <button
+              type="button"
+              onClick={downloadPDF}
+              disabled={analyzing}
+              className="w-full rounded-xl border border-[#d6c1ad] bg-white px-5 py-4 font-bold text-[#795638] shadow-sm transition hover:bg-[#f8f2eb] focus:outline-none focus:ring-2 focus:ring-[#A67B5B] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Download Professional Resume PDF
+            </button>
 
-          <p className="mt-3 text-center text-xs leading-5 text-[#806b58]">
-            Your resume is generated as a formatted PDF with a
-            two-column layout.
-          </p>
+            <button
+              type="button"
+              onClick={analyzeResume}
+              disabled={analyzing || improving}
+              className="w-full rounded-xl bg-[#A67B5B] px-5 py-4 font-bold text-white shadow-md transition hover:bg-[#8e6548] focus:outline-none focus:ring-2 focus:ring-[#A67B5B] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {analyzing
+                ? "Analyzing Resume with AI..."
+                : "Analyse Resume with AI"}
+            </button>
+
+            {message && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="rounded-lg bg-amber-50 p-3 text-sm text-[#795638]"
+              >
+                {message}
+              </p>
+            )}
+
+            <p className="text-center text-xs leading-5 text-[#806b58]">
+              Download your professional resume or send it directly
+              for AI-powered resume scoring and improvement
+              recommendations.
+            </p>
+          </div>
         </section>
 
         {/* LIVE RESUME PREVIEW */}
@@ -844,15 +934,13 @@ export default function ResumeMakerPage() {
               <aside className="bg-[#f8f2eb] px-5 py-7 sm:px-6">
                 <div className="mb-6 border-b border-[#d6c1ad] pb-5">
                   <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#A67B5B] text-xl font-bold text-white shadow-sm">
-                    {(
-                      data.name
-                        .trim()
-                        .split(/\s+/)
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((part) => part[0]?.toUpperCase())
-                        .join("")
-                    ) || "CV"}
+                    {data.name
+                      .trim()
+                      .split(/\s+/)
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((part) => part[0]?.toUpperCase())
+                      .join("") || "CV"}
                   </div>
 
                   <h1 className="break-words text-2xl font-extrabold leading-tight text-[#49382a]">
@@ -869,13 +957,15 @@ export default function ResumeMakerPage() {
                 {/* CONTACT */}
                 <ResumeSection title="Contact">
                   <div className="space-y-3 text-[11px] leading-5 text-[#49382a]">
-                    {[
-                      ["EMAIL", data.email],
-                      ["PHONE", data.phone],
-                      ["LOCATION", data.location],
-                      ["LINKEDIN", data.linkedin],
-                      ["GITHUB", data.github],
-                    ].map(([label, value]) =>
+                    {(
+                      [
+                        ["EMAIL", data.email],
+                        ["PHONE", data.phone],
+                        ["LOCATION", data.location],
+                        ["LINKEDIN", data.linkedin],
+                        ["GITHUB", data.github],
+                      ] as const
+                    ).map(([label, value]) =>
                       value ? (
                         <div key={label} className="min-w-0">
                           <p className="mb-0.5 text-[9px] font-extrabold tracking-wider text-[#A67B5B]">
@@ -901,9 +991,7 @@ export default function ResumeMakerPage() {
 
                 {/* EDUCATION */}
                 <ResumeSection title="Education">
-                  {data.college ||
-                  data.cgpa ||
-                  data.graduationYear ? (
+                  {data.college || data.cgpa || data.graduationYear ? (
                     <div className="space-y-2">
                       <p className="text-xs font-bold leading-5 text-[#49382a]">
                         {[data.degree, data.branch]
@@ -1058,4 +1146,3 @@ export default function ResumeMakerPage() {
     </main>
   );
 }
-

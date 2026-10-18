@@ -655,27 +655,30 @@ export default function ResumeResultPage() {
         {/* NAVIGATION LINKS */}
         <div className="flex flex-wrap items-center justify-center gap-4 font-medium sm:gap-8">
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/dashboard")}
+            className="text-gray-200 hover:text-blue-500"
+            onClick={() =>
+              router.push("/dashboard")
+            }
           >
-            ⚡ Dashboard
+            ⚡Dashboard
           </button>
 
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/interview")}
+            onClick={() =>
+              router.push("/interview")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
-            🎯 Practice
+            🎯Practice
           </button>
 
           <button
-            type="button"
-            className="text-gray-200 transition-colors hover:text-white"
-            onClick={() => router.push("/history")}
+            onClick={() =>
+              router.push("/history")
+            }
+            className="text-gray-200 hover:text-blue-500"
           >
-            📊 My Sessions
+            📊My Sessions
           </button>
         </div>
 

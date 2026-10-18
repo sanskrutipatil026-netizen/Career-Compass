@@ -43,6 +43,12 @@ const interviewQuestionSchema = new mongoose.Schema(
 
 const interviewSchema = new mongoose.Schema(
   {
+    userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  required: false,
+  index: true,
+},
     resumeScore: {
       type: Number,
       default: 0,

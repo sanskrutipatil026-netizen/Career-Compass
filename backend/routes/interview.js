@@ -1,15 +1,11 @@
 const express = require("express");
-
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Interview = require("../models/Interview");
+const authenticateToken = require("../middleware/auth");
 
-// ==========================================================
-// SAVE COMPLETE INTERVIEW
-// POST /api/interview/save
-// ==========================================================
-
-router.post("/save", async (req, res) => {
+router.post("/save", authenticateToken, async (req, res) => {
   try {
     const {
       resumeScore,
@@ -22,10 +18,6 @@ router.post("/save", async (req, res) => {
       time,
     } = req.body;
 
-    // --------------------------------------------------------
-    // VALIDATION
-    // --------------------------------------------------------
-
     if (!Array.isArray(questions)) {
       return res.status(400).json({
         success: false,
@@ -33,132 +25,102 @@ router.post("/save", async (req, res) => {
       });
     }
 
-    // --------------------------------------------------------
-    // CREATE INTERVIEW DOCUMENT
-    // --------------------------------------------------------
+    const normalizedQuestions = questions.map((q) => {
+      const answer = String(q.answer || "").trim();
+      const status =
+        q.status === "Skipped" || answer.toLowerCase() === "skipped"
+          ? "Skipped"
+          : q.status === "Answered" && answer
+            ? "Answered"
+            : "Skipped";
 
-    const interview = new Interview({
-      resumeScore: Number(resumeScore) || 0,
-
-      questions: questions.map((q) => ({
+      return {
         question: q.question || "",
-        answer: q.answer || "",
+        answer,
         topic: q.topic || "Resume",
-        difficulty:
-          q.difficulty ||
-          difficulty ||
-          "easy",
-        score: Number(q.score) || 0,
+        difficulty: q.difficulty || difficulty || "Medium",
+        score: status === "Skipped" ? 0 : Number(q.score) || 0,
         feedback: q.feedback || "",
-        status:
-          q.status || "Answered",
-      })),
-
-      totalScore:
-        Number(totalScore) || 0,
-
-      totalQuestions:
-        Number(totalQuestions) ||
-        questions.length,
-
-      answered:
-        Number(answered) || 0,
-
-      skipped:
-        Number(skipped) || 0,
-
-      difficulty:
-        difficulty || "easy",
-
-      time:
-        time || "00:00",
+        status,
+      };
     });
 
-    // --------------------------------------------------------
-    // SAVE TO MONGODB
-    // --------------------------------------------------------
+    const answeredCount = normalizedQuestions.filter(
+      (q) => q.status === "Answered"
+    ).length;
 
-    const savedInterview =
-      await interview.save();
+    const skippedCount = normalizedQuestions.filter(
+      (q) => q.status === "Skipped"
+    ).length;
 
-    console.log(
-      "✅ Interview saved to MongoDB:",
-      savedInterview._id
+    const calculatedScore = normalizedQuestions.reduce(
+      (sum, q) => sum + q.score,
+      0
     );
+
+    const interview = new Interview({
+      userId: req.user.id,
+      resumeScore: Number(resumeScore) || 0,
+      questions: normalizedQuestions,
+      totalScore:
+        totalScore !== undefined ? Number(totalScore) || 0 : calculatedScore,
+      totalQuestions:
+        totalQuestions !== undefined
+          ? Number(totalQuestions) || normalizedQuestions.length
+          : normalizedQuestions.length,
+      answered: answeredCount,
+      skipped: skippedCount,
+      difficulty: difficulty || "Medium",
+      time: time || "00:00",
+    });
+
+    const savedInterview = await interview.save();
 
     return res.status(201).json({
       success: true,
-      message:
-        "Interview saved successfully.",
+      message: "Interview saved successfully.",
       interview: savedInterview,
     });
-
   } catch (error) {
-    console.error(
-      "❌ SAVE INTERVIEW ERROR:",
-      error
-    );
+    console.error("Save interview error:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to save interview.",
-      error: error.message,
+      message: "Failed to save interview.",
     });
   }
 });
 
-// ==========================================================
-// GET ALL INTERVIEW HISTORY
-// GET /api/interview/history
-// ==========================================================
-
-router.get("/history", async (req, res) => {
+router.get("/history", authenticateToken, async (req, res) => {
   try {
-    const interviews =
-      await Interview.find()
-        .sort({
-          createdAt: -1,
-        });
+    const interviews = await Interview.find({
+      userId: req.user.id,
+    }).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       interviews,
     });
-
   } catch (error) {
-    console.error(
-      "❌ GET INTERVIEW HISTORY ERROR:",
-      error
-    );
+    console.error("Fetch interview history error:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to fetch interview history.",
-      error: error.message,
+      message: "Failed to fetch interview history.",
     });
   }
 });
 
-// ==========================================================
-// GET LATEST INTERVIEW
-// GET /api/interview/latest
-// ==========================================================
-
-router.get("/latest", async (req, res) => {
+router.get("/latest", authenticateToken, async (req, res) => {
   try {
-    const interview =
-      await Interview.findOne()
-        .sort({
-          createdAt: -1,
-        });
+    const interview = await Interview.findOne({
+      userId: req.user.id,
+    }).sort({ createdAt: -1 });
 
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message:
-          "No interview found.",
+        message: "No interview found for this account.",
       });
     }
 
@@ -166,83 +128,60 @@ router.get("/latest", async (req, res) => {
       success: true,
       interview,
     });
-
   } catch (error) {
-    console.error(
-      "❌ GET LATEST INTERVIEW ERROR:",
-      error
-    );
+    console.error("Fetch latest interview error:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to fetch latest interview.",
-      error: error.message,
+      message: "Failed to fetch the latest interview.",
     });
   }
 });
 
-// ==========================================================
-// DELETE INTERVIEW
-// DELETE /api/interview/:id
-// ==========================================================
-
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   try {
-    const deletedInterview =
-      await Interview.findByIdAndDelete(
-        req.params.id
-      );
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid interview ID.",
+      });
+    }
+
+    const deletedInterview = await Interview.findOneAndDelete({
+      _id: id,
+      userId: req.user.id,
+    });
 
     if (!deletedInterview) {
       return res.status(404).json({
         success: false,
         message:
-          "Interview not found.",
+          "Interview not found or you do not have permission to delete it.",
       });
     }
 
-    console.log(
-      "🗑 Interview deleted from MongoDB:",
-      req.params.id
-    );
-
     return res.status(200).json({
       success: true,
-      message:
-        "Interview deleted successfully.",
+      message: "Interview deleted successfully.",
     });
-
   } catch (error) {
-    console.error(
-      "❌ DELETE INTERVIEW ERROR:",
-      error
-    );
+    console.error("Delete interview error:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        "Failed to delete interview.",
-      error: error.message,
+      message: "Failed to delete interview.",
     });
   }
 });
 
-// ==========================================================
-// TEST ROUTE
-// GET /api/interview/test
-// ==========================================================
-
 router.get("/test", (req, res) => {
   return res.status(200).json({
     success: true,
-    message:
-      "Interview route is working.",
+    message: "Interview API is working.",
   });
 });
 
-// ==========================================================
-// EXPORT
-// ==========================================================
-
 module.exports = router;
+
