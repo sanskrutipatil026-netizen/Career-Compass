@@ -24,6 +24,7 @@ export default function FeedbackPage() {
   const helpfulFeatures = [
     "AI Mock Interviews",
     "Resume Analysis",
+    "Resume Maker",
     "Placement Preparation",
     "Skills & Assessments",
     "Career Resources",
