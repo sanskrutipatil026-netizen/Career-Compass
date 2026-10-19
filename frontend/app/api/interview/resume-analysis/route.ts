@@ -1,15 +1,16 @@
+
 import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 import Groq from "groq-sdk";
 import mammoth from "mammoth";
-
-const pdf = require("pdf-parse-debugging-disabled");
+import { PDFParse } from "pdf-parse";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BACKEND_URL = (
-  process.env.BACKEND_URL || "https://career-compass-backend-v8sv.onrender.com"
+  process.env.BACKEND_URL ||
+  "https://career-compass-backend-v8sv.onrender.com"
 ).replace(/\/+$/, "");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -33,9 +34,7 @@ const EXCLUDED_SECTIONS = [
 ];
 
 function isExcludedSection(value: unknown): boolean {
-  if (typeof value !== "string") {
-    return false;
-  }
+  if (typeof value !== "string") return false;
 
   const normalized = value
     .trim()
@@ -53,9 +52,7 @@ function isExcludedSection(value: unknown): boolean {
 }
 
 function containsExcludedContent(value: unknown): boolean {
-  if (typeof value !== "string") {
-    return false;
-  }
+  if (typeof value !== "string") return false;
 
   return (
     isExcludedSection(value) ||
@@ -101,9 +98,7 @@ function cleanResumeAnalysis(analysis: any) {
   if (Array.isArray(analysis.resumeImprovements)) {
     analysis.resumeImprovements = analysis.resumeImprovements.filter(
       (item: any) => {
-        if (!item || typeof item !== "object") {
-          return false;
-        }
+        if (!item || typeof item !== "object") return false;
 
         return ![
           item.section,
@@ -118,19 +113,43 @@ function cleanResumeAnalysis(analysis: any) {
   return analysis;
 }
 
-function normalizeUrl(rawUrl: string): string {
-  if (typeof rawUrl !== "string") {
-    return "";
+/**
+ * Extract readable text from a PDF buffer using pdfjs-dist.
+ * Note: scanned PDFs containing only images require OCR.
+ */
+
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  const parser = new PDFParse({
+    data: new Uint8Array(buffer),
+  });
+
+  try {
+    const result = await parser.getText();
+    const text = result.text?.trim() || "";
+
+    if (!text) {
+      throw new Error(
+        "No text could be extracted from this PDF. Try uploading a text-based PDF."
+      );
+    }
+
+    return text;
+  } finally {
+    await parser.destroy();
   }
+}
+
+
+
+function normalizeUrl(rawUrl: string): string {
+  if (typeof rawUrl !== "string") return "";
 
   let value = rawUrl.trim();
 
   value = value.replace(/^[("<\[]+/, "");
   value = value.replace(/[),.;\]">]+$/g, "");
 
-  if (!value) {
-    return "";
-  }
+  if (!value) return "";
 
   if (!/^https?:\/\//i.test(value)) {
     value = `https://${value}`;
@@ -139,17 +158,9 @@ function normalizeUrl(rawUrl: string): string {
   try {
     const parsed = new URL(value);
 
-    if (!["http:", "https:"].includes(parsed.protocol)) {
-      return "";
-    }
-
-    if (!parsed.hostname.includes(".")) {
-      return "";
-    }
-
-    if (parsed.username || parsed.password) {
-      return "";
-    }
+    if (!["http:", "https:"].includes(parsed.protocol)) return "";
+    if (!parsed.hostname.includes(".")) return "";
+    if (parsed.username || parsed.password) return "";
 
     return parsed.toString().replace(/\/$/, "");
   } catch {
@@ -167,24 +178,17 @@ function extractResumeLinks(text: string): string[] {
   for (const match of matches) {
     const start = match.index ?? 0;
 
-    if (start > 0 && text[start - 1] === "@") {
-      continue;
-    }
+    if (start > 0 && text[start - 1] === "@") continue;
 
     const normalized = normalizeUrl(match[0]);
 
-    if (!normalized) {
-      continue;
-    }
+    if (!normalized) continue;
 
     try {
       const parsed = new URL(normalized);
       const host = parsed.hostname.toLowerCase().replace(/^www\./i, "");
 
-      if (
-        host.includes("example.com") ||
-        host === "localhost"
-      ) {
+      if (host.includes("example.com") || host === "localhost") {
         continue;
       }
 
@@ -324,7 +328,6 @@ function applyDetectedLinks(
   }
 
   const detected = classifyResumeLinks(links, resumeText);
-
   const fields = ["linkedin", "github", "portfolio"] as const;
 
   for (const field of fields) {
@@ -389,7 +392,6 @@ function normalizeContactInfo(analysis: any) {
         value: "",
         suggestion: "",
       };
-
       continue;
     }
 
@@ -436,18 +438,14 @@ function normalizeEducation(analysis: any) {
       }
 
       const normalized = {
-        degree:
-          typeof item.degree === "string" ? item.degree.trim() : "",
-        field:
-          typeof item.field === "string" ? item.field.trim() : "",
+        degree: typeof item.degree === "string" ? item.degree.trim() : "",
+        field: typeof item.field === "string" ? item.field.trim() : "",
         institution:
           typeof item.institution === "string"
             ? item.institution.trim()
             : "",
         duration:
-          typeof item.duration === "string"
-            ? item.duration.trim()
-            : "",
+          typeof item.duration === "string" ? item.duration.trim() : "",
         cgpa:
           typeof item.cgpa === "string" ||
           typeof item.cgpa === "number"
@@ -473,10 +471,7 @@ function normalizeEducation(analysis: any) {
     analysis.education.suggestion = "";
   }
 
-  if (
-    !analysis.education.present &&
-    !analysis.education.suggestion
-  ) {
+  if (!analysis.education.present && !analysis.education.suggestion) {
     analysis.education.suggestion =
       "No education details were identified.";
   }
@@ -509,15 +504,11 @@ function normalizeExperience(analysis: any) {
     .map((item: any) => ({
       title: typeof item.title === "string" ? item.title : "",
       organization:
-        typeof item.organization === "string"
-          ? item.organization
-          : "",
+        typeof item.organization === "string" ? item.organization : "",
       duration:
         typeof item.duration === "string" ? item.duration : "",
       description:
-        typeof item.description === "string"
-          ? item.description
-          : "",
+        typeof item.description === "string" ? item.description : "",
     }))
     .filter(
       (item: any) =>
@@ -538,9 +529,7 @@ function normalizeStringArray(
   value: unknown,
   filterExcluded = true
 ): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
+  if (!Array.isArray(value)) return [];
 
   return value
     .filter((item): item is string => typeof item === "string")
@@ -553,13 +542,7 @@ function normalizeStringArray(
 }
 
 function normalizeResumeSections(analysis: any) {
-  const sectionNames = [
-    "projects",
-    
-    "achievements",
-  ];
-
-  for (const sectionName of sectionNames) {
+  for (const sectionName of ["projects", "achievements"]) {
     const section = analysis[sectionName];
 
     if (
@@ -572,7 +555,6 @@ function normalizeResumeSections(analysis: any) {
         items: [],
         suggestion: "",
       };
-
       continue;
     }
 
@@ -638,6 +620,7 @@ function normalizeAnalysis(analysis: any) {
   analysis.skills = normalizeStringArray(analysis.skills);
   analysis.strengths = normalizeStringArray(analysis.strengths);
   analysis.weaknesses = normalizeStringArray(analysis.weaknesses);
+
   analysis.missingIndustrySkills = normalizeStringArray(
     analysis.missingIndustrySkills
   );
@@ -699,9 +682,9 @@ function normalizeAnalysis(analysis: any) {
     Math.min(100, Math.round(Number(analysis.overallScore) || 0))
   );
 
-  // Remove any excluded fields again after normalization.
   delete analysis.communicationGaps;
   delete analysis.communicationGap;
+  delete analysis.communication;
   delete analysis.extracurricularActivities;
   delete analysis.extracurricularActivity;
   delete analysis.languages;
@@ -715,18 +698,20 @@ function normalizeAnalysis(analysis: any) {
 }
 
 async function findExistingAnalysis(resumeHash: string) {
-  const response = await fetch(
-    `${BACKEND_URL}/api/resume-analysis/by-hash/${encodeURIComponent(
-      resumeHash
-    )}`,
-    {
+  const url = `${BACKEND_URL}/api/resume-analysis/by-hash/${encodeURIComponent(resumeHash)}`;
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
       method: "GET",
       cache: "no-store",
-    }
-  );
-
-  if (response.status === 404) {
-    return null;
+    });
+  } catch (error) {
+    console.error("Backend connection failed:", error);
+    throw new Error(
+      `Could not connect to Express backend at ${url}`
+    );
   }
 
   const responseText = await response.text();
@@ -737,15 +722,22 @@ async function findExistingAnalysis(resumeHash: string) {
     data = JSON.parse(responseText);
   } catch {
     throw new Error(
-      "Express returned an invalid response while checking existing resume analysis."
+      `Backend returned non-JSON. HTTP ${response.status}: ${responseText.slice(0, 300)}`
     );
+  }
+
+  console.log("Resume lookup status:", response.status);
+  console.log("Resume lookup response:", data);
+
+  if (response.status === 404) {
+    return null;
   }
 
   if (!response.ok) {
     throw new Error(
-      data?.error ||
-        data?.message ||
-        "Failed to check existing resume analysis."
+      `Resume lookup failed. HTTP ${response.status}: ${
+        data?.message || data?.error || responseText.slice(0, 300)
+      }`
     );
   }
 
@@ -800,9 +792,9 @@ export async function POST(req: Request) {
     let resumeText = "";
     const hyperlinkTargets: string[] = [];
 
+    // PDF extraction: use pdfjs-dist instead of pdf(buffer).
     if (fileName.endsWith(".pdf")) {
-      const data = await pdf(buffer);
-      resumeText = data.text || "";
+      resumeText = await extractPdfText(buffer);
     } else if (fileName.endsWith(".docx")) {
       const [rawData, htmlData] = await Promise.all([
         mammoth.extractRawText({ buffer }),
@@ -848,10 +840,7 @@ export async function POST(req: Request) {
     const detectedLinks = [
       ...new Map(
         [...extractResumeLinks(resumeText), ...hyperlinkTargets].map(
-          (url) => [
-            url.replace(/\/$/, "").toLowerCase(),
-            url,
-          ]
+          (url) => [url.replace(/\/$/, "").toLowerCase(), url]
         )
       ).values(),
     ];
@@ -879,7 +868,6 @@ export async function POST(req: Request) {
     }
 
     // 2. Check MongoDB for a previously saved analysis.
-    // This also works after restarting the Next.js server.
     let existingAnalysis: any;
 
     try {
@@ -960,7 +948,6 @@ Return this structure:
     "items": [],
     "suggestion": ""
   },
-  
   "achievements": {
     "present": false,
     "items": [],
@@ -972,7 +959,6 @@ Return this structure:
 }
 
 GENERAL RULES:
-
 - Analyze strengths and weaknesses using evidence from the resume.
 - Do not return communicationGaps or communicationGap.
 - Do not analyze communication gaps.
@@ -982,7 +968,6 @@ GENERAL RULES:
 - Do not create recommendations about communication gaps, extracurricular activities, languages, hobbies, or interests.
 
 CONTACT INFORMATION:
-
 Check full name, professional email, phone, LinkedIn, GitHub, and portfolio.
 Set present to true only when supported by the resume.
 Never invent contact information.
@@ -991,7 +976,6 @@ Use extracted hyperlink targets as evidence.
 Do not assume a GitHub repository is the candidate's personal profile.
 
 EDUCATION:
-
 Return education.items as objects with these fields:
 {
   "degree": "",
@@ -1000,13 +984,11 @@ Return education.items as objects with these fields:
   "duration": "",
   "cgpa": ""
 }
-
 Extract only information supported by the resume.
 Use empty strings for unavailable fields.
 Do not invent a CGPA, percentage, institution, or graduation year.
 
 EXPERIENCE:
-
 Return experience.items as objects with:
 {
   "title": "",
@@ -1014,34 +996,28 @@ Return experience.items as objects with:
   "duration": "",
   "description": ""
 }
-
 Include genuine internships, employment, freelance work, training, or open-source contributions when documented.
 Never invent experience.
 
 PROJECTS:
-
 Return projects.items as an array of strings.
 Describe genuine projects and their available technologies, features, contributions, and links.
 Do not invent project details.
 
 CERTIFICATIONS AND ACHIEVEMENTS:
-
-Return certifications.items and achievements.items as arrays of strings.
+Return achievements.items as an array of strings.
 Only include genuine information mentioned in the resume.
 Never invent awards, certifications, ranks, or achievements.
 
 MISSING SECTIONS:
-
 Check relevant resume sections, including:
 Name, Email, Phone, Education, Skills, Projects, Experience,
 Professional Summary, LinkedIn, GitHub, Portfolio,
 Certifications, and Achievements.
-
 Do not include communication gaps, extracurricular activities,
 languages, hobbies, or interests in missingSections.
 
 RESUME IMPROVEMENTS:
-
 Each improvement must contain:
 {
   "section": "",
@@ -1050,25 +1026,20 @@ Each improvement must contain:
   "suggestion": "",
   "priority": "high"
 }
-
 Priority must be high, medium, or low.
 Give practical, specific recommendations based on evidence.
 Never recommend fake skills, experience, certifications, or achievements.
 Do not create improvements about excluded sections.
 
 OVERALL SCORE:
-
 Use this fixed rubric:
-
 Skills and technical knowledge: 30 points.
 Projects: 20 points.
 Education: 15 points.
 Experience/internships: 15 points.
 Certifications: 10 points.
 Resume quality and completeness: 10 points.
-
 Total: 100 points.
-
 Score each category independently based on evidence.
 Add the six category scores.
 Return an integer from 0 to 100.
@@ -1076,40 +1047,33 @@ Do not invent information or award unsupported points.
 Do not change the rubric.
 
 EXPERIENCE LEVEL:
-
 Estimate the candidate's level using documented experience only.
 
 INDUSTRY SKILLS:
-
 Identify relevant industry skills that are not already demonstrated.
 Consider the candidate's technical domain and experience level.
 
 ROADMAP:
-
 Return exactly 3 to 5 stages in logical order.
 Each stage must have a short name and 2 to 5 keywords.
 Do not return paragraphs.
 Show progression toward placement readiness.
 
 DOMAINS:
-
 Return domains as objects:
 {
   "name": "",
   "score": 0
 }
-
 Scores must be integers from 0 to 100 and represent estimated resume evidence, not measured test results.
 
 CONSISTENCY:
-
 Use the fixed rubric above.
 Do not introduce random score variation.
 The same substantive resume information must be scored consistently.
 Return only valid JSON without markdown.
 
 RESUME:
-
 ${resumeTextForAnalysis}
 `;
 
@@ -1187,7 +1151,6 @@ ${resumeTextForAnalysis}
     );
 
     const responseText = await mongoResponse.text();
-
     let mongoData: any;
 
     try {
@@ -1238,3 +1201,4 @@ ${resumeTextForAnalysis}
     );
   }
 }
+

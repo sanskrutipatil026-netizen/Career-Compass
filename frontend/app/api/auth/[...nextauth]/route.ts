@@ -1,11 +1,14 @@
+
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+
 const BACKEND_URL = (
   process.env.BACKEND_URL ||
   "https://career-compass-backend-v8sv.onrender.com"
-).replace(/\/$/, "");
+).replace(/\/+$/, "");
+
 
 const handler = NextAuth({
   providers: [
@@ -16,7 +19,6 @@ const handler = NextAuth({
 
     CredentialsProvider({
       name: "Credentials",
-
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
@@ -28,19 +30,24 @@ const handler = NextAuth({
         }
 
         try {
-          const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-            cache: "no-store",
-          });
+          const response = await fetch(
+            `${BACKEND_URL}/api/auth/login`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password,
+              }),
+              cache: "no-store",
+            }
+          );
 
-          const contentType = response.headers.get("content-type") || "";
+          const contentType =
+            response.headers.get("content-type") || "";
+
           const responseText = await response.text();
 
           if (!contentType.includes("application/json")) {
@@ -49,6 +56,7 @@ const handler = NextAuth({
               contentType,
               body: responseText.slice(0, 200),
             });
+
             return null;
           }
 
@@ -61,11 +69,18 @@ const handler = NextAuth({
             return null;
           }
 
-          if (!response.ok || !data.token || !data.user?.id) {
+          if (
+            !response.ok ||
+            !data.token ||
+            !data.user?.id
+          ) {
             console.error("Credentials backend login failed:", {
               status: response.status,
               message: data.message,
+              hasUserId: Boolean(data.user?.id),
+              hasBackendToken: Boolean(data.token),
             });
+
             return null;
           }
 
@@ -73,7 +88,7 @@ const handler = NextAuth({
             id: String(data.user.id),
             name: data.user.name ?? null,
             email: data.user.email,
-            backendToken: data.token,
+            backendToken: String(data.token),
           };
         } catch (error) {
           console.error("Credentials backend login error:", error);
@@ -89,6 +104,7 @@ const handler = NextAuth({
 
   callbacks: {
     async jwt({ token, user, account }) {
+      // Save the backend token returned by Credentials login.
       if (user) {
         const authenticatedUser = user as typeof user & {
           id?: string;
@@ -104,6 +120,7 @@ const handler = NextAuth({
         }
       }
 
+      // Exchange the Google ID token for your backend JWT.
       if (account?.provider === "google") {
         if (!account.id_token) {
           console.error("Google sign-in did not provide an ID token.");
@@ -125,7 +142,9 @@ const handler = NextAuth({
             }
           );
 
-          const contentType = response.headers.get("content-type") || "";
+          const contentType =
+            response.headers.get("content-type") || "";
+
           const responseText = await response.text();
 
           if (!contentType.includes("application/json")) {
@@ -134,6 +153,7 @@ const handler = NextAuth({
               contentType,
               body: responseText.slice(0, 200),
             });
+
             return token;
           }
 
@@ -146,18 +166,23 @@ const handler = NextAuth({
             return token;
           }
 
-          if (!response.ok || !data.token || !data.user?.id) {
+          if (
+            !response.ok ||
+            !data.token ||
+            !data.user?.id
+          ) {
             console.error("Google backend login failed:", {
               status: response.status,
               message: data.message,
               hasUserId: Boolean(data.user?.id),
               hasBackendToken: Boolean(data.token),
             });
+
             return token;
           }
 
           token.userId = String(data.user.id);
-          token.backendToken = data.token;
+          token.backendToken = String(data.token);
 
           console.log("Google backend login successful:", {
             hasUserId: Boolean(token.userId),
@@ -168,6 +193,7 @@ const handler = NextAuth({
         }
       }
 
+      // Never print the actual JWT.
       console.log("NEXTAUTH JWT RESULT:", {
         provider: account?.provider ?? "existing-session",
         hasUserId: Boolean(token.userId),
@@ -177,13 +203,30 @@ const handler = NextAuth({
       return token;
     },
 
-    async session({ session, token }) {
-      if (session.user && token.userId) {
-        session.user.id = String(token.userId);
-      }
+async session({ session, token }) {
+  // Expose the authenticated user's ID.
+  if (session.user && token.userId) {
+    session.user.id = String(token.userId);
+  }
 
-      return session;
-    },
+  // Expose the backend token in the session.
+  if (token.backendToken) {
+    session.backendToken = String(token.backendToken);
+
+    // Also preserve it under session.user for compatibility.
+    if (session.user) {
+      (
+        session.user as typeof session.user & {
+          backendToken?: string;
+        }
+      ).backendToken = String(token.backendToken);
+    }
+  }
+
+  return session;
+},
+
+
   },
 
   secret: process.env.NEXTAUTH_SECRET,
