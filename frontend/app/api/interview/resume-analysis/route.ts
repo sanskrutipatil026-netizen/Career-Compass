@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 import Groq from "groq-sdk";
 import mammoth from "mammoth";
+import { CanvasFactory } from "pdf-parse/worker";
 import { PDFParse } from "pdf-parse";
 
 export const runtime = "nodejs";
@@ -117,10 +118,10 @@ function cleanResumeAnalysis(analysis: any) {
  * Extract readable text from a PDF buffer using pdfjs-dist.
  * Note: scanned PDFs containing only images require OCR.
  */
-
 async function extractPdfText(buffer: Buffer): Promise<string> {
   const parser = new PDFParse({
     data: new Uint8Array(buffer),
+    CanvasFactory,
   });
 
   try {
@@ -138,7 +139,6 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
     await parser.destroy();
   }
 }
-
 
 
 function normalizeUrl(rawUrl: string): string {
